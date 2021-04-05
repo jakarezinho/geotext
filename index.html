@@ -70,36 +70,22 @@
         //const url = "https://dadosabertos.cascais.pt/dataset/747d02ae-21fb-4fa3-8a07-9da8db991684/resource/8ded093a-7978-4062-8d64-7598db2f8506/download/mnpraia.geojson"
     var myHeaders = new Headers();
 
-    var inicio = new Date()
-    console.log(inicio)
-        ////// POPUP/////
+
+    ////// POPUP/////
 
     function onEachFeature(feature, layer) {
-        var popupContent = "<p>I started out as a GeoJSON " +
-            feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
+        var info = feature.properties.Info ? feature.properties.Info : ''
+        var popupContent = "<h3>HERE / AQUI </h3>"
+
+
 
         if (feature.properties && feature.properties.Name) {
             popupContent += feature.properties.Name + '<br>'
+            popupContent += info + '<br>'
 
         }
 
         layer.bindPopup(popupContent);
-    }
-    //////LABEL TEXT//////
-
-    function labelText(feature, latlng) {
-        var size = feature.properties.Size ? feature.properties.Size : '20'
-        var radius = size ? size * 2.3 : 100
-
-
-        label = String('<span " style=" font-size: ' + size + 'px;">' + feature.properties.Name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
-        return new L.CircleMarker(latlng, {
-            radius: radius,
-        }).bindTooltip(label, {
-            permanent: true,
-            direction: "center",
-            className: "my-labels"
-        }).openTooltip();
     }
 
     //// function text marker zoom////
@@ -123,9 +109,13 @@
 
     };
 
+
+    ////////LABEL IMAGE TEXTE ////////
     function labelText(feature, latlng) {
         var size = feature.properties.Size ? feature.properties.Size : '20'
         var radius = size ? size * 2.3 : 100
+
+
         var l
         switch (feature.properties.Love) {
             case 'love':
@@ -164,11 +154,31 @@
             case 'paisagem':
                 l = '<p><img src="images/paisagem.gif"></p>';
                 break;
+            case 'praia':
+                l = '<p><img src="images/praia.gif"></p>';
+                break;
+            case 'bronze':
+                l = '<p><img src="images/bronze.gif"></p>';
+                break;
+            case 'sapo':
+                l = '<p><img src="images/sapo.gif"></p>';
+                break;
+            case 'star':
+                l = '<p><img src="images/star.gif"></p>';
+                break;
+            case 'napoleon':
+                l = '<p><img src="images/napoleon.gif"></p>';
+                break;
+            case 'guerra':
+                l = '<p><img src="images/guerra.gif"></p>';
+                break;
+            case 'mar':
+                l = '<p><img src="images/mar.gif"></p>';
+                break;
             default:
                 l = '';
 
         }
-        console.log(feature.properties.love + '--' + l)
 
         label = String(l + '<span " style=" font-size: ' + size + 'px;">' + feature.properties.Name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
         return new L.CircleMarker(latlng, {
@@ -178,9 +188,10 @@
             direction: "center",
             className: "my-labels"
         }).openTooltip();
+
     }
 
-    //// function text marker zoom////
+    //// TEXT MARKER ZOOM ////
     function textZoomDetail(pointLayer, zoom) {
         var zoomlevel = map.getZoom();
         map.addLayer(pointLayer)
@@ -202,7 +213,7 @@
 
     };
 
-
+    ///////////  GET URL FUNCTION GENERALE /////////////////////
     function getText(url, detail, zoom = false) {
 
         fetch(detail)
@@ -271,6 +282,7 @@
 
 
     }
+    ///////// FIM
     window.load = getText(url, detail, 15)
 </script>
 

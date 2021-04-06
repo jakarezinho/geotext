@@ -10,6 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Material+Icons|Material+Icons+Outlined|Material+Icons+Two+Tone|Material+Icons+Round|Material+Icons+Sharp" rel="stylesheet">
     <style>
+         :root {
+            --blanc: #FFF;
+            --noir: #000;
+        }
+        
         html,
         body {
             height: 100%;
@@ -32,29 +37,65 @@
             box-shadow: none;
             font-weight: bold;
             font-size: 20px;
-            text-shadow: 2px 2px 2px #160303;
+            text-shadow: 2px 2px 2px var(--noir);
             white-space: normal;
             text-align: center;
             line-height: 120%;
             border: none;
             width: 200px;
             border-width: 2px;
-            color: #fafafa;
+            color: var(--blanc);
+        }
+        
+        .leaflet-tooltip.my-labels p {
+            padding: 0;
+            margin: 0;
+        }
+        /* ////// navigation /////  */
+        
+        .menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .menu span {
+            width: 35px;
+            height: 35px;
+            padding: 5px;
+            border-radius: 50%;
+            font-size: 35px;
+            background-color: var(--blanc);
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
 
-
 </head>
 
 <body>
-    <p><img src="images/love.gif"></p>
+    <div class="menu"><span id="open" class="material-icons-two-tone">more_vert </span> </div>
+    <div></div>
     <div id="map"></div>
 
 </body>
 <script>
-    var map = L.map('map').setView([39.40748359101977, -9.131741523742676], 13);
+    /////DEVICE/////
+    var zoomDevice
+    var device
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        // true for mobile device
+        zoomDevice = 13
+        device == 'mobile'
+    } else {
+        // false for not mobile device
+        zoomDevice = 12
+        device == 'destop'
+    }
+
+    ////MAP////
+    var map = L.map('map').setView([39.40748359101977, -9.131741523742676], zoomDevice);
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -65,11 +106,10 @@
         accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
     }).addTo(map);
 
-    const url = "data/geral.geojson"
-    const detail = "data/detail.geojson"
-        //const url = "https://dadosabertos.cascais.pt/dataset/747d02ae-21fb-4fa3-8a07-9da8db991684/resource/8ded093a-7978-4062-8d64-7598db2f8506/download/mnpraia.geojson"
-    var myHeaders = new Headers();
 
+
+    const url = "data/geral/geral.geojson"
+    const detail = "data/detail_c/detail.geojson"
 
     ////// POPUP/////
 
@@ -91,9 +131,11 @@
     //// function text marker zoom////
     function textZoom(pointLayer, zoom) {
         var zoomlevel = map.getZoom();
+
         if (zoomlevel < zoom) {
             if (map.hasLayer(pointLayer)) {
                 map.removeLayer(pointLayer);
+
             } else {
                 console.log("no point layer active");
             }
@@ -103,6 +145,7 @@
                 console.log("layer already added");
             } else {
                 map.addLayer(pointLayer);
+
             }
         }
         console.log("Current Zoom Level =" + zoomlevel)
@@ -114,7 +157,6 @@
     function labelText(feature, latlng) {
         var size = feature.properties.Size ? feature.properties.Size : '20'
         var radius = size ? size * 2.3 : 100
-
 
         var l
         switch (feature.properties.Love) {
@@ -175,6 +217,36 @@
             case 'mar':
                 l = '<p><img src="images/mar.gif"></p>';
                 break;
+            case 'fire':
+                l = '<p><img src="images/fogo.gif"></p>';
+                break;
+            case 'nature':
+                l = '<p><img src="images/nature.gif"></p>';
+                break;
+            case 'dino':
+                l = '<p><img src="images/dino.gif"></p>';
+                break;
+            case 'fog':
+                l = '<p><img src="images/fog.gif"></p>';
+                break;
+            case 'city':
+                l = '<p><img src="images/city.gif"></p>';
+                break;
+            case 'froid':
+                l = '<p><img src="images/froid.gif"></p>';
+                break;
+            case 'mercado':
+                l = '<p><img src="images/mercado.gif"></p>';
+                break;
+            case 'ennui':
+                l = '<p><img src="images/ennui.gif"></p>';
+                break;
+            case 'chines':
+                l = '<p><img src="images/chines.gif"></p>';
+                break;
+
+
+
             default:
                 l = '';
 
@@ -190,6 +262,7 @@
         }).openTooltip();
 
     }
+
 
     //// TEXT MARKER ZOOM ////
     function textZoomDetail(pointLayer, zoom) {
@@ -216,39 +289,7 @@
     ///////////  GET URL FUNCTION GENERALE /////////////////////
     function getText(url, detail, zoom = false) {
 
-        fetch(detail)
-            .then((response) => {
-                return response.json();
-            })
-            .then((data) => {
-                console.log(data.features)
-
-
-                var detail = L.geoJSON(data, {
-
-                    style: (feature) => {
-                        return {
-                            color: feature.properties.Color,
-                            opacity: 0,
-                            //dashArray: 20,
-                            // fill: false
-                        };
-                    },
-
-                    onEachFeature: onEachFeature,
-
-                    pointToLayer: labelText
-
-                });
-
-
-                /////add remove layer zoom///
-
-                map.on('zoomend', () => textZoom(detail, zoom))
-                    // map.fitBounds(pointLayer.getBounds());
-            });
-        //////
-
+        //// fecth general level 1/////
         fetch(url)
             .then((response) => {
                 return response.json();
@@ -276,13 +317,72 @@
                 geral.addData(data)
                 map.addLayer(geral)
                     /////add remove layer zoom///
-
+                map.on('zoomend', () => layerGeneral(geral, zoom))
+                    // map.fitBounds(pointLayer.getBounds());
 
             });
 
+        ///// fetch detail caldas da rainha////
+
+        fetch(detail)
+            .then((response) => {
+                return response.json();
+            })
+            .then((data) => {
+                console.log(data.features)
+
+
+                var detail = L.geoJSON(data, {
+
+                    style: (feature) => {
+                        return {
+                            color: feature.properties.Color,
+                            opacity: 0,
+                            //dashArray: 20,
+                            // fill: false
+                        };
+                    },
+
+                    onEachFeature: onEachFeature,
+
+                    pointToLayer: labelText
+
+                });
+
+
+
+
+                /////add remove layer zoom///
+
+                map.on('zoomend', () => textZoom(detail, zoom))
+                    // map.fitBounds(pointLayer.getBounds());
+            });
+
+
 
     }
-    ///////// FIM
+
+
+    ///// ADD REMOVE LAYER PRINCIPAL ZOOM LEVEL ////
+
+    function layerGeneral(layer, zoom) {
+        var zoommap = map.getZoom();
+        if (zoommap >= zoom) {
+            if (map.hasLayer(layer)) {
+                map.removeLayer(layer);
+                console.log("layer active non active geral");
+            }
+
+        } else {
+            map.addLayer(layer)
+            console.log("layer active geral active");
+        }
+
+
+    }
+
+    //////// FIM
+
     window.load = getText(url, detail, 15)
 </script>
 

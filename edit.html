@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset=utf-8 />
+    <title>Leaflet Draw</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js" integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA==" crossorigin=""></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+        
+        #map {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 100%;
+        }
+        
+        #delete,
+        #export {
+            position: absolute;
+            top: 50px;
+            right: 10px;
+            z-index: 800;
+            background: white;
+            color: black;
+            padding: 6px;
+            border-radius: 4px;
+            font-family: 'Helvetica Neue';
+            cursor: pointer;
+            font-size: 12px;
+            text-decoration: none;
+        }
+        
+        #export {
+            top: 90px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" integrity="sha512-gc3xjCmIy673V6MyOAZhIW93xhM9ei1I+gLbmFjUHIjocENRsLX/QUE1htk5q1XV2D/iie/VQ8DXI6Vu8bexvQ==" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js" integrity="sha512-ozq8xQKq6urvuU6jNgkfqAmT7jKN2XumbrX1JiB3TnF7tI48DPI4Gy1GXKD/V3EExgAs1V+pRO7vwtS1LHg0Gw==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw-src.js" integrity="sha512-czICF/Crp0B7QB13iQZG9bYUpd/P1Ona1NeZN52gYsoVFXIpakDmdOUepMCHCMBIBd9Ei5Mlg8Quy4e504IT5A==" crossorigin="anonymous"></script>
+
+    <div id='map'></div>
+    <div id='delete'>Delete Features</div>
+    <a href='#' id='export'>Export Features</a>
+
+    <script>
+        let map = L.map('map', {
+            zoomControl: false
+        }).setView([39.40748359101977, -9.131741523742676], 13)
+        L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            maxZoom: 18,
+            minZoom: 11,
+            id: 'mapbox/streets-v11',
+            tileSize: 512,
+            zoomOffset: -1,
+            accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
+        }).addTo(map);
+
+
+        var featureGroup = L.featureGroup().addTo(map);
+
+
+        async function addGeoJson(file) {
+
+            const response = await fetch(file);
+            const data = await response.json();
+
+            var selectedFeature = null;
+            L.geoJson(data, {
+
+
+                onEachFeature: function(feature, layer) {
+
+                    featureGroup.addLayer(layer);
+
+
+                    layer.on('dblclick', function(e) {
+
+
+                        if (selectedFeature) {
+                            selectedFeature.editing.disable();
+                            // and Here I'll add the code to store my edited polygon in the DB or whatever I want to do with it
+                        }
+                        selectedFeature = e.target;
+                        e.target.editing.enable();
+
+                        ////infos/////
+                        let Name = selectedFeature.feature.properties.Name ? selectedFeature.feature.properties.Name : ''
+                        let Love = selectedFeature.feature.properties.Love ? selectedFeature.feature.properties.Love : ''
+                        let Size = selectedFeature.feature.properties.Size ? selectedFeature.feature.properties.Size : ''
+                        let Color = selectedFeature.feature.properties.Color ? selectedFeature.feature.properties.Color : ''
+                        let Info = selectedFeature.feature.properties.Info ? selectedFeature.feature.properties.Info : ''
+
+                        var content = '<span><b>Name</b></span><br/><textarea id="Name" cols="25" rows="5">' + Name + '</textarea><br/><br><span><b>Color</b></span><br><input id="Color" type="text" value="' + Color + '"/><br/><br/><span><b>Icon</b></span><br/><input id="Love" type="text" value="' + Love + '"/><br/><br/><span><b>Size</b></span><br/><input id="Size" type="text" value="' + Size + '"/><br/><br/><span><b>Info<b/></span><br/><textarea id="Info" cols="25" rows="5">' + Info + '</textarea><br/><br/><input type="button" id="Save" value="Save" />';
+                        layer.bindPopup(content);
+
+                        map.on('popupopen', function(e) {
+                            let save = document.getElementById('Save')
+                            if (save) {
+                                save.onclick = () => {
+                                    selectedFeature.feature.properties.Name = document.getElementById('Name').value
+                                    selectedFeature.feature.properties.Love = document.getElementById('Love').value
+                                    selectedFeature.feature.properties.Size = document.getElementById('Size').value
+                                    selectedFeature.feature.properties.Color = document.getElementById('Color').value
+                                    selectedFeature.feature.properties.Info = document.getElementById('Info').value
+                                    featureGroup.addLayer(selectedFeature)
+                                    map.closePopup()
+                                    selectedFeature.editing.disable();
+                                }
+
+                            }
+
+                        })
+
+                        map.on('popupclose', function(e) {
+                            selectedFeature.editing.disable();
+                            console.log('closepopup')
+
+                        })
+
+
+
+                    });
+
+
+
+
+
+
+
+                }
+
+            }).bindTooltip(function(layer) {
+                    console.log(layer)
+                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + layer.feature.properties.Love + '<br> Infos: ' + layer.feature.properties.Info); // Needs to be a string
+                } //, {permanent: true, opacity: 0.5}
+            ).addTo(map);
+
+            var drawControl = new L.Control.Draw({
+                edit: {
+                    featureGroup: featureGroup
+                }
+            }).addTo(map);
+
+            function saveIdIW() {
+                let cancel = document.getElementById('color')
+                console.log(cancel)
+                    //e.target.editing.disable();
+            }
+
+
+            ////////////////////
+            map.on('draw:created', function(e) {
+
+                layer = e.layer
+                var type = e.layerType;
+
+                var feature = layer.feature = layer.feature || {}; // Intialize layer.feature
+
+                feature.type = feature.type || "Feature"; // Intialize fueature.type
+                var props = feature.properties = feature.properties || {}; // Intialize feature.properties
+                console.log(props)
+
+                if (type === 'marker') {
+                    props.Name = prompt("Texto a exibir no marcador ");
+                    props.Love = prompt("Icon");
+                    props.Size = prompt("tamanho do texto");
+                    props.Info = prompt("informações complementares");
+                    props.Color = prompt("cor do marcador");
+                    var popContent = "<p><b>NOVO.</b></br>" +
+                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  SIZE :" + props.Size + " INFOS:" + props.Info + " Color:" + props.Color + "</p>";
+                    layer.bindPopup(popContent);
+                }
+                featureGroup.addLayer(layer);
+
+            });
+
+            /////
+
+
+
+
+        }
+
+
+        addGeoJson('data/geral.geojson')
+
+        ////https://stackoverflow.com/questions/58126090/leaflet-draw-saving-data-with-geojson
+
+
+
+
+
+        ////https://gis.stackexchange.com/questions/203540/how-to-edit-an-existing-layer-using-leaflet
+
+
+
+        //////
+        // on click, clear all layers
+        document.getElementById('delete').onclick = function(e) {
+            featureGroup.clearLayers();
+        }
+
+        document.getElementById('export').onclick = function(e) {
+            // Extract GeoJson from featureGroup
+            var data = featureGroup.toGeoJSON();
+
+            // Stringify the GeoJson
+            var convertedData = 'text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(data));
+
+            // Create export
+            document.getElementById('export').setAttribute('href', 'data:' + convertedData);
+            document.getElementById('export').setAttribute('download', 'data.geojson');
+        }
+
+
+        ///////
+        /*
+            var data = fetchJSON('placesgj.geojson')
+            .then(function(data) { 
+
+        // do what you want to do with `data` here...
+        data.features.forEach(function(feature) {
+                console.log(feature);
+                var symbol = feature.properties['icon'];
+                console.log(symbol);
+            });
+
+});
+*/
+    </script>
+</body>
+
+</html>

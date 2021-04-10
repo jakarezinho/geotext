@@ -13,6 +13,8 @@
          :root {
             --blanc: #FFF;
             --noir: #000;
+            --shadow: #2e2d2d;
+            --shadow_map: text-shadow: 1px 1px 0 var(--shadow), 1px 2px 0 var(--shadow), 3px 3px 0 var(--shadow), -1px -1px 0 var(--shadow), 1px -1px 0 var(--shadow), -1px 1px 0 var(--shadow), 0 1px 0 var(--shadow);
         }
         
         html,
@@ -21,7 +23,7 @@
             padding: 0;
             margin: 0;
             height: 100%;
-            font-family: Verdana, Geneva, Lucida, Arial, Helvetica, Lucida Console, Monaco, monospace;
+            font-family: 'Nunito', sans-serif;
             font-size: 100%;
         }
         
@@ -29,15 +31,15 @@
             position: absolute;
             height: 100%;
             width: 100%;
+            z-index: 0;
         }
         
         .leaflet-tooltip.my-labels {
-            font-family: 'Nunito', sans-serif;
             background-color: transparent;
             box-shadow: none;
             font-weight: bold;
             font-size: 20px;
-            text-shadow: 2px 2px 2px var(--noir);
+            text-shadow: 1px 1px 0 var(--shadow), 1px 2px 0 var(--shadow), 3px 3px 0 var(--shadow), -1px -1px 0 var(--shadow), 1px -1px 0 var(--shadow), -1px 1px 0 var(--shadow), 0 1px 0 var(--shadow);
             white-space: normal;
             text-align: center;
             line-height: 120%;
@@ -51,13 +53,17 @@
             padding: 0;
             margin: 0;
         }
-        /* ////// navigation /////  */
+        
+        .leaflet-tooltip.my-labels span {
+            transform: rotate( 0.5deg);
+        }
+        /* ////// NAVIGATION /////  */
         
         .menu {
             position: absolute;
             top: 20px;
             right: 20px;
-            z-index: 1000;
+            z-index: 2000;
         }
         
         .menu span {
@@ -67,6 +73,29 @@
             border-radius: 50%;
             font-size: 35px;
             background-color: var(--blanc);
+            cursor: pointer;
+        }
+        
+        .doc {
+            background-color: #c2b8ab;
+            width: 100vw;
+            height: 100%;
+            transition: 1s;
+            position: fixed;
+            left: 100vw;
+            z-index: 1000;
+        }
+        
+        .dep {
+            transform: translateX(-100vw);
+        }
+        
+        .header {
+            color: var(--blanc);
+            text-shadow: 2px 2px var(--shadow);
+            margin: 20px;
+            padding-top: 100px;
+            font-size: 30px;
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A==" crossorigin="" />
@@ -75,18 +104,47 @@
 </head>
 
 <body>
-    <div class="menu"><span id="open" class="material-icons-two-tone">more_vert </span> </div>
-    <div></div>
+    <div class="menu">
+        <div id="open"></div>
+    </div>
+    <div id="dc" class="doc">
+        <div class="header">
+            <p><img src="images/hot_map.gif"></p>
+            <h1> Para saber melhor</h1>
+            <p>sasasasa</p>
+        </div>
+
+    </div>
     <div id="map"></div>
 
 </body>
 <script>
-    /////DEVICE/////
-    var zoomDevice
-    var device
+    /////MENO OPEN///
+
+    let open = document.querySelector('#open')
+    let dcm = document.querySelector('#dc')
+    open.innerHTML = '<span class="material-icons-two-tone">help_outline </span>'
+
+
+    open.addEventListener("click", () => {
+            open.innerHTML = '<span class="material-icons-two-tone">close</span>'
+            if (dcm.classList.contains('dep')) {
+                open.innerHTML = '<span class="material-icons-two-tone">help_outline</span>'
+
+            } else {
+                open.innerHTML = '<span class="material-icons-two-tone">close</span>'
+
+            }
+
+            dc.classList.toggle("dep")
+
+        })
+        /////DEVICE/////
+    let zoomDevice
+    let device
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         // true for mobile device
-        zoomDevice = 13
+        zoomDevice = 10
         device == 'mobile'
     } else {
         // false for not mobile device
@@ -95,7 +153,11 @@
     }
 
     ////MAP////
-    var map = L.map('map').setView([39.40748359101977, -9.131741523742676], zoomDevice);
+    let map = L.map('map', {
+        zoomControl: false
+    }).setView([39.40748359101977, -9.131741523742676], zoomDevice)
+
+
     L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
         attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
         maxZoom: 18,
@@ -105,17 +167,29 @@
         zoomOffset: -1,
         accessToken: 'pk.eyJ1IjoibWFwYXVyYmFubyIsImEiOiJja215cm8xYzIwNHp1Mnh0M2QwZ3puZmkwIn0.ig4jIr-gZzUfuIX8YZB0ug'
     }).addTo(map);
+    ///zoom control
+    L.control.zoom({
+        position: 'bottomright'
+    }).addTo(map);
 
-
-
+    ///// GEOJSON URL/////
     const url = "data/geral/geral.geojson"
     const detail = "data/detail_c/detail.geojson"
 
-    ////// POPUP/////
+    ///// IMAGE ICON ///////
+    function imogIcon(icon) {
 
+        if (icon) {
+            return '<p><img src="images/' + icon + '.gif"></p>';
+        } else {
+            return ''
+        }
+    }
+
+    ////// POPUP/////
     function onEachFeature(feature, layer) {
-        var info = feature.properties.Info ? feature.properties.Info : ''
-        var popupContent = "<h3>HERE / AQUI </h3>"
+        let info = feature.properties.Info ? feature.properties.Info : ''
+        let popupContent = "<h3>HERE / AQUI </h3>"
 
 
 
@@ -130,7 +204,7 @@
 
     //// function text marker zoom////
     function textZoom(pointLayer, zoom) {
-        var zoomlevel = map.getZoom();
+        let zoomlevel = map.getZoom();
 
         if (zoomlevel < zoom) {
             if (map.hasLayer(pointLayer)) {
@@ -155,104 +229,13 @@
 
     ////////LABEL IMAGE TEXTE ////////
     function labelText(feature, latlng) {
-        var size = feature.properties.Size ? feature.properties.Size : '20'
-        var radius = size ? size * 2.3 : 100
+        let name = feature.properties.Name ? feature.properties.Name : ''
+        let size = feature.properties.Size ? feature.properties.Size : '20'
+        let radius = size ? size * 2.3 : 100
 
-        var l
-        switch (feature.properties.Love) {
-            case 'love':
-                l = '<p><img src="images/love.gif"></p>';
-                break;
-            case 'hot':
-                l = '<p><img src="images/hot.gif"></p>';
-                break;
-            case 'bad':
-                l = '<p><img src="images/bad.gif"></p>';
-                break;
-            case 'mort':
-                l = '<p><img src="images/mort.gif"></p>';
-                break;
-            case 'pff':
-                l = '<p><img src="images/pff.gif"></p>';
-                break;
-            case 'religion':
-                l = '<p><img src="images/religion.gif"></p>';
-                break;
-            case 'sardines':
-                l = '<p><img src="images/sardines.gif"></p>';
-                break;
-            case 'tourist':
-                l = '<p><img src="images/tourist.gif"></p>';
-                break;
-            case 'surprise':
-                l = '<p><img src="images/surprise.gif"></p>';
-                break;
-            case 'desert':
-                l = '<p><img src="images/desert.gif"></p>';
-                break;
-            case 'surfing':
-                l = '<p><img src="images/surfing.gif"></p>';
-                break;
-            case 'paisagem':
-                l = '<p><img src="images/paisagem.gif"></p>';
-                break;
-            case 'praia':
-                l = '<p><img src="images/praia.gif"></p>';
-                break;
-            case 'bronze':
-                l = '<p><img src="images/bronze.gif"></p>';
-                break;
-            case 'sapo':
-                l = '<p><img src="images/sapo.gif"></p>';
-                break;
-            case 'star':
-                l = '<p><img src="images/star.gif"></p>';
-                break;
-            case 'napoleon':
-                l = '<p><img src="images/napoleon.gif"></p>';
-                break;
-            case 'guerra':
-                l = '<p><img src="images/guerra.gif"></p>';
-                break;
-            case 'mar':
-                l = '<p><img src="images/mar.gif"></p>';
-                break;
-            case 'fire':
-                l = '<p><img src="images/fogo.gif"></p>';
-                break;
-            case 'nature':
-                l = '<p><img src="images/nature.gif"></p>';
-                break;
-            case 'dino':
-                l = '<p><img src="images/dino.gif"></p>';
-                break;
-            case 'fog':
-                l = '<p><img src="images/fog.gif"></p>';
-                break;
-            case 'city':
-                l = '<p><img src="images/city.gif"></p>';
-                break;
-            case 'froid':
-                l = '<p><img src="images/froid.gif"></p>';
-                break;
-            case 'mercado':
-                l = '<p><img src="images/mercado.gif"></p>';
-                break;
-            case 'ennui':
-                l = '<p><img src="images/ennui.gif"></p>';
-                break;
-            case 'chines':
-                l = '<p><img src="images/chines.gif"></p>';
-                break;
+        let l = imogIcon(feature.properties.Love)
 
-
-
-            default:
-                l = '';
-
-        }
-
-        label = String(l + '<span " style=" font-size: ' + size + 'px;">' + feature.properties.Name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
+        label = String(l + '<span " style=" font-size: ' + size + 'px;">' + name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
         return new L.CircleMarker(latlng, {
             radius: radius,
         }).bindTooltip(label, {
@@ -266,7 +249,7 @@
 
     //// TEXT MARKER ZOOM ////
     function textZoomDetail(pointLayer, zoom) {
-        var zoomlevel = map.getZoom();
+        let zoomlevel = map.getZoom();
         map.addLayer(pointLayer)
         if (zoomlevel < zoom) {
             if (map.hasLayer(pointLayer)) {
@@ -298,7 +281,7 @@
                 console.log(data.features)
 
 
-                var geral = L.geoJSON(data, {
+                let geral = L.geoJSON(data, {
 
                     style: (feature) => {
                         return {
@@ -332,7 +315,7 @@
                 console.log(data.features)
 
 
-                var detail = L.geoJSON(data, {
+                let detail = L.geoJSON(data, {
 
                     style: (feature) => {
                         return {
@@ -366,7 +349,7 @@
     ///// ADD REMOVE LAYER PRINCIPAL ZOOM LEVEL ////
 
     function layerGeneral(layer, zoom) {
-        var zoommap = map.getZoom();
+        let zoommap = map.getZoom();
         if (zoommap >= zoom) {
             if (map.hasLayer(layer)) {
                 map.removeLayer(layer);

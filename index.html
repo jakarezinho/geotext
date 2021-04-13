@@ -53,11 +53,11 @@
             padding: 0;
             margin: 0;
         }
-        
-        .leaflet-tooltip.my-labels span {
-            transform: rotate( 0.5deg);
-        }
         /* ////// NAVIGATION /////  */
+        
+        .leaflet-popup-content-wrapper {
+            border-radius: 5px !important;
+        }
         
         .menu {
             position: absolute;
@@ -79,15 +79,21 @@
         .doc {
             background-color: #c2b8ab;
             width: 100vw;
-            height: 100%;
-            transition: 1s;
+            height: 100vh;
+            top: 0;
+            left: 0;
             position: fixed;
-            left: 100vw;
+            /* left: 100vw;*/
             z-index: 1000;
+            opacity: 0;
+            transition: opacity 300ms;
+            z-index: 0;
         }
         
         .dep {
-            transform: translateX(-100vw);
+            /*transform: translateX(-100vw);*/
+            opacity: 1;
+            z-index: 1000;
         }
         
         .header {
@@ -144,7 +150,7 @@
     let device
     if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
         // true for mobile device
-        zoomDevice = 10
+        zoomDevice = 11
         device == 'mobile'
     } else {
         // false for not mobile device
@@ -177,15 +183,7 @@
     const detail = "data/detail.geojson"
         ////////////////////////////////////////////
 
-    ///// IMAGE ICON ///////
-    function imogIcon(icon) {
 
-        if (icon) {
-            return '<p><img src="images/' + icon + '.gif"></p>';
-        } else {
-            return ''
-        }
-    }
 
     ////// POPUP/////
     function onEachFeature(feature, layer) {
@@ -234,10 +232,13 @@
         let name = feature.properties.Name ? feature.properties.Name : ''
         let size = feature.properties.Size ? feature.properties.Size : '20'
         let radius = size ? size * 2.3 : 100
+        let post_date = feature.properties.Time ? feature.properties.Time : ''
+        let novo = novidade(post_date)
+
 
         let l = imogIcon(feature.properties.Love)
 
-        label = String(l + '<span " style=" font-size: ' + size + 'px;">' + name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
+        label = String(novo + l + '<span " style=" font-size: ' + size + 'px;">' + name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
         return new L.CircleMarker(latlng, {
             radius: radius,
             fillColor: color
@@ -346,7 +347,9 @@
 
 
 
-    }
+    } //////// FIM
+
+
 
 
     ///// ADD REMOVE LAYER PRINCIPAL ZOOM LEVEL ////
@@ -367,7 +370,28 @@
 
     }
 
-    //////// FIM
+    ///// IMAGE ICON ///////
+    function imogIcon(icon) {
+
+        if (icon) {
+            return '<p><img src="images/' + icon + '.gif"></p>';
+        } else {
+            return ''
+        }
+    }
+
+    ////////////////// FUNCTION NOVIDADE /////////////////////
+    function novidade(post_date) {
+        var countDownDate = new Date(post_date).getTime()
+        var now = new Date().getTime();
+
+        // Find the distance between now an the count down date
+        var distance = now - countDownDate
+        var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+        return days <= 5 ? "<img src='images/novo.gif'>" : ""
+    }
+
+    /////// FIM
 
     window.load = getText(url, detail, 15)
 </script>

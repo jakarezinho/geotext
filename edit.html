@@ -56,6 +56,7 @@
         ////// MAPAS A CARREGAR geojson///////
         const geral = 'data/geral.geojson'
         const detail_oest = 'data/detail.geojson'
+        const teste = 'data/teste.geojson'
             ///////////////
 
 
@@ -88,7 +89,7 @@
                 onEachFeature: function(feature, layer) {
 
                     featureGroup.addLayer(layer);
-                    console.log(layer)
+                    console.log(feature)
 
 
                     layer.on('dblclick', function(e) {
@@ -106,6 +107,7 @@
                         let Size = selectedFeature.feature.properties.Size ? selectedFeature.feature.properties.Size : ''
                         let Color = selectedFeature.feature.properties.Color ? selectedFeature.feature.properties.Color : ''
                         let Info = selectedFeature.feature.properties.Info ? selectedFeature.feature.properties.Info : ''
+
 
                         var content = '<span><b>Name</b></span><br/><textarea id="Name" cols="25" rows="5">' + Name + '</textarea><br/><br><span><b>Color</b></span><br><input id="Color" type="text" value="' + Color + '"/><br/><br/><span><b>Icon</b></span><br/><input id="Love" type="text" value="' + Love + '"/><br/><br/><span><b>Size</b></span><br/><input id="Size" type="text" value="' + Size + '"/><br/><br/><span><b>Info<b/></span><br/><textarea id="Info" cols="25" rows="5">' + Info + '</textarea><br/><br/><input type="button" id="Save" value="Save" />';
                         layer.bindPopup(content);
@@ -142,8 +144,11 @@
                 }
 
             }).bindTooltip(function(layer) {
+                    let novo = novidade(layer.feature.properties.Time)
+
+
                     let icons = layer.feature.properties.Love ? '<img src="images/' + layer.feature.properties.Love + '.gif">' : 'sem'
-                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + icons + '<br> Infos: ' + layer.feature.properties.Info); // Needs to be a string
+                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + icons + '<br> Infos: ' + novo); // Needs to be a string
                 } //, {permanent: true, opacity: 0.5}
             ).addTo(map);
 
@@ -155,7 +160,7 @@
 
 
 
-            ////////////////////
+            ////////////////////CRIAR TEXTO/////
             map.on('draw:created', function(e) {
 
                 layer = e.layer
@@ -168,26 +173,45 @@
                 console.log(props)
 
                 if (type === 'marker') {
+                    props.Time = new Date()
                     props.Name = prompt("Texto a exibir no marcador ");
                     props.Love = prompt("Icon");
                     props.Size = prompt("tamanho do texto");
                     props.Info = prompt("informações complementares");
                     props.Color = prompt("cor do marcador");
                     var popContent = "<p><b>NOVO.</b></br>" +
-                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  SIZE :" + props.Size + " INFOS:" + props.Info + " Color:" + props.Color + "</p>";
+                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  TIME :" + props.Time + " INFOS:" + props.Info + " Color:" + props.Color + "</p>";
                     layer.bindPopup(popContent);
                 }
                 featureGroup.addLayer(layer);
 
             });
 
+
+            ///////
+
+
+
+
+
+
+
             /////
-
-
 
 
         }
 
+
+        ////////////////// FUNCTION NOVIDADE /////////////////////
+        function novidade(post_date) {
+            var countDownDate = new Date(post_date).getTime()
+            var now = new Date().getTime();
+
+            // Find the distance between now an the count down date
+            var distance = now - countDownDate
+            var days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            return days <= 5 ? "NOVO!" : ""
+        }
 
         addGeoJson(geral)
 

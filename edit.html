@@ -11,6 +11,7 @@
         body {
             margin: 0;
             padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
         }
         
         #map {
@@ -26,11 +27,10 @@
             top: 50px;
             right: 10px;
             z-index: 800;
-            background: white;
-            color: black;
+            background: #2d5cf5;
+            color: #fcfafa;
             padding: 6px;
             border-radius: 4px;
-            font-family: 'Helvetica Neue';
             cursor: pointer;
             font-size: 12px;
             text-decoration: none;
@@ -49,10 +49,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw-src.js" integrity="sha512-czICF/Crp0B7QB13iQZG9bYUpd/P1Ona1NeZN52gYsoVFXIpakDmdOUepMCHCMBIBd9Ei5Mlg8Quy4e504IT5A==" crossorigin="anonymous"></script>
 
     <div id='map'></div>
-    <div id='delete'>Delete Features</div>
-    <a href='#' id='export'>Export Features</a>
+
+    <a href='#' id='export'>Export GEOjson</a>
 
     <script>
+        ////// MAPAS A CARREGAR geojson///////
+        const geral = 'data/geral.geojson'
+        const detail_oest = 'data/detail.geojson'
+            ///////////////
+
+
         let map = L.map('map', {
             zoomControl: false
         }).setView([39.40748359101977, -9.131741523742676], 13)
@@ -82,10 +88,10 @@
                 onEachFeature: function(feature, layer) {
 
                     featureGroup.addLayer(layer);
+                    console.log(layer)
 
 
                     layer.on('dblclick', function(e) {
-
 
                         if (selectedFeature) {
                             selectedFeature.editing.disable();
@@ -133,16 +139,11 @@
                     });
 
 
-
-
-
-
-
                 }
 
             }).bindTooltip(function(layer) {
-                    console.log(layer)
-                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + layer.feature.properties.Love + '<br> Infos: ' + layer.feature.properties.Info); // Needs to be a string
+                    let icons = layer.feature.properties.Love ? '<img src="images/' + layer.feature.properties.Love + '.gif">' : 'sem'
+                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + icons + '<br> Infos: ' + layer.feature.properties.Info); // Needs to be a string
                 } //, {permanent: true, opacity: 0.5}
             ).addTo(map);
 
@@ -152,11 +153,6 @@
                 }
             }).addTo(map);
 
-            function saveIdIW() {
-                let cancel = document.getElementById('color')
-                console.log(cancel)
-                    //e.target.editing.disable();
-            }
 
 
             ////////////////////
@@ -193,7 +189,7 @@
         }
 
 
-        addGeoJson('data/geral.geojson')
+        addGeoJson(geral)
 
         ////https://stackoverflow.com/questions/58126090/leaflet-draw-saving-data-with-geojson
 
@@ -205,11 +201,7 @@
 
 
 
-        //////
-        // on click, clear all layers
-        document.getElementById('delete').onclick = function(e) {
-            featureGroup.clearLayers();
-        }
+
 
         document.getElementById('export').onclick = function(e) {
             // Extract GeoJson from featureGroup

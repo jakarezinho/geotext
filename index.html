@@ -172,9 +172,10 @@
         position: 'bottomright'
     }).addTo(map);
 
-    ///// GEOJSON URL/////
-    const url = "data/geral/geral.geojson"
-    const detail = "data/detail_c/detail.geojson"
+    ///// GEOJSON URL/////////////////////////////
+    const url = "data/geral.geojson"
+    const detail = "data/detail.geojson"
+        ////////////////////////////////////////////
 
     ///// IMAGE ICON ///////
     function imogIcon(icon) {
@@ -194,7 +195,7 @@
 
 
         if (feature.properties && feature.properties.Name) {
-            popupContent += feature.properties.Name + '<br>'
+            popupContent += '<strong>' + feature.properties.Name + '</strong><br>'
             popupContent += info + '<br>'
 
         }
@@ -229,6 +230,7 @@
 
     ////////LABEL IMAGE TEXTE ////////
     function labelText(feature, latlng) {
+        let color = feature.properties.Color ? feature.properties.Color : '#897459'
         let name = feature.properties.Name ? feature.properties.Name : ''
         let size = feature.properties.Size ? feature.properties.Size : '20'
         let radius = size ? size * 2.3 : 100
@@ -238,6 +240,7 @@
         label = String(l + '<span " style=" font-size: ' + size + 'px;">' + name + '</span>') // .bindTooltip can't use straight 'feature.properties.attribute'
         return new L.CircleMarker(latlng, {
             radius: radius,
+            fillColor: color
         }).bindTooltip(label, {
             permanent: true,
             direction: "center",

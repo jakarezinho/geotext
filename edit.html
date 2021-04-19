@@ -145,10 +145,11 @@
 
             }).bindTooltip(function(layer) {
                     let novo = novidade(layer.feature.properties.Time)
+                    let infos = shorten(layer.feature.properties.Info, 30)
 
 
                     let icons = layer.feature.properties.Love ? '<img src="images/' + layer.feature.properties.Love + '.gif">' : 'sem'
-                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + icons + '<br> Infos: ' + novo); // Needs to be a string
+                    return String('texto: <strong>' + layer.feature.properties.Name + ' </strong><br> Icon: ' + icons + '<br> Infos: ' + infos + '<br>Time: ' + novo); // Needs to be a string
                 } //, {permanent: true, opacity: 0.5}
             ).addTo(map);
 
@@ -180,7 +181,7 @@
                     props.Info = prompt("informações complementares");
                     props.Color = prompt("cor do marcador");
                     var popContent = "<p><b>NOVO.</b></br>" +
-                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  TIME :" + props.Time + " INFOS:" + props.Info + " Color:" + props.Color + "</p>";
+                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  TIME :" + props.Time + " INFOS:" + props.Info + " Color:" + props.Color + "Size:" + props.Size + "</p>";
                     layer.bindPopup(popContent);
                 }
                 featureGroup.addLayer(layer);
@@ -212,6 +213,13 @@
             var days = Math.floor(distance / (1000 * 60 * 60 * 24));
             return days <= 5 ? "NOVO!" : ""
         }
+
+
+        ///////// LIMITA TEXTO/////
+        function shorten(text, max) {
+            return text && text.length > max ? text.slice(0, max).split(' ').slice(0, -1).join(' ') + ' ... ' : text
+        }
+
 
         addGeoJson(geral)
 

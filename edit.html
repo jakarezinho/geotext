@@ -39,6 +39,14 @@
         #export {
             top: 90px;
         }
+        
+        .edite input[type="button"] {
+            background: #2d5cf5;
+            color: #fcfafa;
+            padding: 6px;
+            font-size: 12px;
+            border: none;
+        }
     </style>
 </head>
 
@@ -109,7 +117,7 @@
                         let Info = selectedFeature.feature.properties.Info ? selectedFeature.feature.properties.Info : ''
 
 
-                        var content = '<span><b>Name</b></span><br/><textarea id="Name" cols="25" rows="5">' + Name + '</textarea><br/><br><span><b>Color</b></span><br><input id="Color" type="text" value="' + Color + '"/><br/><br/><span><b>Icon</b></span><br/><input id="Love" type="text" value="' + Love + '"/><br/><br/><span><b>Size</b></span><br/><input id="Size" type="text" value="' + Size + '"/><br/><br/><span><b>Info<b/></span><br/><textarea id="Info" cols="25" rows="5">' + Info + '</textarea><br/><br/><input type="button" id="Save" value="Save" />';
+                        var content = '<div class="edite"><span><b>Name</b></span><br/><textarea id="Name" cols="25" rows="5">' + Name + '</textarea><br/><br><span><b>Color</b></span><br><input id="Color" type="text" value="' + Color + '"/><br/><br/><span><b>Icon</b></span><br/><input id="Love" type="text" value="' + Love + '"/><br/><br/><span><b>Size</b></span><br/><input id="Size" type="text" value="' + Size + '"/><br/><br/><span><b>Info<b/></span><br/><textarea id="Info" cols="25" rows="5">' + Info + '</textarea><br/><br/><input type="button" id="Save" value="Save" /></div>';
                         layer.bindPopup(content);
 
                         map.on('popupopen', function(e) {
@@ -181,7 +189,7 @@
                     props.Info = prompt("informações complementares");
                     props.Color = prompt("cor do marcador");
                     var popContent = "<p><b>NOVO.</b></br>" +
-                        "TEXTE: " + props.Name + " ICON: " + props.Love + "  TIME :" + props.Time + " INFOS:" + props.Info + " Color:" + props.Color + "Size:" + props.Size + "</p>";
+                        "TEXTE: " + props.Name + " ICON: " + props.Love + " INFOS:" + props.Info + " Color:" + props.Color + "Size:" + props.Size + "</p>";
                     layer.bindPopup(popContent);
                 }
                 featureGroup.addLayer(layer);
@@ -190,11 +198,6 @@
 
 
             ///////
-
-
-
-
-
 
 
             /////
@@ -230,9 +233,6 @@
 
 
         ////https://gis.stackexchange.com/questions/203540/how-to-edit-an-existing-layer-using-leaflet
-
-
-
 
 
         document.getElementById('export').onclick = function(e) {
